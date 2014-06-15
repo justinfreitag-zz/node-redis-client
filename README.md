@@ -1,7 +1,7 @@
 # node-redis-client
 
-*Redis-client* is a *lightweight* and *fast* [*Redis*](http://redis.io)
-client for [*Node.js*](http://nodejs.org). I could be more descriptive, but that
+**node-redis-client** is a *lightweight* and *fast* [**Redis**](http://redis.io)
+client for [**Node.js**](http://nodejs.org). I could be more descriptive, but that
 would just add weight and slow it down.
 
 If you're interested in *benchmarks*, there's a slightly modified version of
