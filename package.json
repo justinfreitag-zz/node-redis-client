@@ -1,0 +1,32 @@
+{
+  "name": "redis-client",
+  "version": "0.0.1",
+  "description": "A lightweight and fast Redis client for Node.js",
+  "dependencies": {
+    "eventemitter3": "0.1.2"
+  },
+  "devDependencies": {
+    "mocha": "1.20.0"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test ./node_modules/.bin/mocha -R spec"
+  },
+  "engines": {
+    "node": ">= 0.10.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:justinfreitag/node-redis-client.git"
+  },
+  "keywords": [
+    "redis",
+    "nosql",
+    "database",
+    "client",
+    "nodejs"
+  ],
+  "author": {
+    "name": "Justin Freitag <justin.freitag@gmail.com>"
+  },
+  "license": "MIT"
+}
