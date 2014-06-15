@@ -1,4 +1,4 @@
-# Redis-client
+# node-redis-client
 
 *Redis-client* is a *lightweight* and *fast* [*Redis*](http://redis.io)
 client for [*Node.js*](http://nodejs.org). I could be more descriptive, but that
@@ -10,7 +10,7 @@ in [/bin](https://github.com/justinfreitag/node-redis-client/blob/master/bin)
 that may be used for comparison.
 
     // Import client
-    var RedisClient = require('redis-client');
+    var RedisClient = require('node-redis-client');
 
     // Create client
     var client = new RedisClient(6379, '127.0.0.1');
