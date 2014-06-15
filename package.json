@@ -1,5 +1,5 @@
 {
-  "name": "redis-client",
+  "name": "node-redis-client",
   "version": "0.0.1",
   "description": "A lightweight and fast Redis client for Node.js",
   "dependencies": {
@@ -20,10 +20,7 @@
   },
   "keywords": [
     "redis",
-    "nosql",
-    "database",
-    "client",
-    "nodejs"
+    "database"
   ],
   "author": {
     "name": "Justin Freitag <justin.freitag@gmail.com>"
