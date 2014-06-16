@@ -1,6 +1,6 @@
 {
   "name": "node-redis-client",
-  "version": "0.0.0",
+  "version": "0.0.2",
   "description": "A lightweight and fast Redis client for Node.js",
   "dependencies": {
     "eventemitter3": "0.1.2"
