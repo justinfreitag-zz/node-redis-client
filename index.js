@@ -8,8 +8,8 @@ var util = require('util');
 function tryCallback(client, callback, error, response) {
   try {
     callback(error, response);
-  } catch (exception) {
-    client.emit('callback-error', error, error, response);
+  } catch (error) {
+    client.emit('callback-error', error);
   }
 }
 

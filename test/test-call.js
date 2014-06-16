@@ -20,7 +20,10 @@ it('should emit callback-error', function (done) {
   client.call('PING', function (error, result) {
     throw(new Error('POOOONG!'));
   });
-  client.once('callback-error', done);
+  client.once('callback-error', function (error) {
+    assert(error instanceof Error);
+    done();
+  });
 });
 
 it('should set and get value', function (done) {
