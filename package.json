@@ -1,9 +1,9 @@
 {
   "name": "node-redis-client",
-  "version": "0.0.3",
-  "description": "A lightweight and fast Redis client for Node.js",
+  "version": "0.0.4",
+  "description": "A lightweight Redis client for Node.js",
   "dependencies": {
-    "eventemitter3": "0.1.2"
+    "node-resp": "0.0.1"
   },
   "devDependencies": {
     "mocha": "1.20.0"
@@ -20,10 +20,12 @@
   },
   "keywords": [
     "redis",
-    "database"
+    "database",
+    "client"
   ],
   "author": {
     "name": "Justin Freitag <justin.freitag@gmail.com>"
   },
   "license": "MIT"
 }
+

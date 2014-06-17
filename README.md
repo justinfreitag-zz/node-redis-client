@@ -1,8 +1,8 @@
 # node-redis-client
 
-**node-redis-client** is a *lightweight* and *fast* [Redis](http://redis.io)
-client for [Node.js](http://nodejs.org). I could be more descriptive, but that
-would just add weight and slow it down.
+**node-redis-client** is a *lightweight* [Redis](http://redis.io) client for
+[Node.js](http://nodejs.org). I could be more descriptive, but that would just
+add weight and slow it down.
 
 If you're interested in *benchmarks*, there's a slightly modified version of
 the [node-redis multi-bench utility](https://github.com/mranney/node_redis/blob/master/multi_bench.js)
@@ -10,7 +10,7 @@ in [/bin](https://github.com/justinfreitag/node-redis-client/blob/master/bin)
 that may be used comparing against node-redis. A 5 client benchmark (taken on a
 Linux VM guest running on a MBP) can be found in [/bench](https://github.com/justinfreitag/node-redis-client/blob/master/bench).
 
-## and some sample code ...
+## Usage
 
     // Import client
     var RedisClient = require('node-redis-client');
@@ -31,7 +31,7 @@ Linux VM guest running on a MBP) can be found in [/bench](https://github.com/jus
         assert.equal(result, 'OK');
       });
 
-      // Multi `COMMAND` block, with callback only for `EXEC`
+      // Multi block caring for callback only on EXEC
       client.call('MULTI');
       client.call('SET', 'foo', 'bar');
       client.call('GET', 'foo');
@@ -57,3 +57,4 @@ Linux VM guest running on a MBP) can be found in [/bench](https://github.com/jus
 
 Copyright (c) 2014 Justin Freitag. See the LICENSE file for license rights and
 limitations (MIT).
+

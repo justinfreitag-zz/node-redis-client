@@ -2,7 +2,7 @@
 
 var events = require('events');
 var net = require('net');
-var resp = require('./lib/resp');
+var resp = require('node-resp');
 var util = require('util');
 
 function tryCallback(client, callback, error, response) {
@@ -88,7 +88,8 @@ RedisClient.prototype.call = function () {
     --arguments.length;
   }
   if (arguments.length) {
-    this.request += resp.stringify.apply(null, arguments);
+    // TODO add binary/buffer support
+    this.request += resp.createRequestString.apply(null, arguments);
   }
   this.callbacks[this.callbacksEnd] = callback;
   this.callbacksEnd = (this.callbacksEnd + 1) % this.callbacks.length;
