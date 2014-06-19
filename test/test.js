@@ -2,6 +2,8 @@ var assert = require('assert');
 var domain = require('domain');
 var RedisClient = require('..');
 
+// TODO add max callback depth test
+
 var client = null;
 
 before(function (done) {

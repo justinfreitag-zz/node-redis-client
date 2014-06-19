@@ -8,13 +8,15 @@ var util = require('util');
 function handleResponse(client, response) {
   var callback = client.callbacks[client.callbacksBegin];
   client.callbacksBegin = (client.callbacksBegin + 1) % client.callbacks.length;
-  if (typeof callback === 'function') {
+  if (callback && typeof callback === 'function') {
     if (response instanceof Error) {
       callback(response);
     } else {
       callback(null, response);
     }
-  } else if (response instanceof Error) {
+    return;
+  }
+  if (response instanceof Error) {
     client.emit('call-error', response);
   }
 }
@@ -40,24 +42,23 @@ function handleEnd(client) {
   client.parser = null;
 }
 
-var defaultOptions = {
-  maxCallbackDepth: 5000
+var DEFAULT_OPTIONS = {
+  maximumCallbackDepth: 0x100
 };
 
 function RedisClient(port, host, options) {
-  var self = this;
-
   if (host instanceof Object) {
     options = host;
     host = null;
   }
-  this.options = util._extend(defaultOptions, options);
+  this.options = util._extend(DEFAULT_OPTIONS, options);
   this.request = '';
-  this.callbacks = new Array(this.options.maxCallbackDepth);
+  this.callbacks = new Array(this.options.maximumCallbackDepth);
   this.callbacksBegin = 0;
   this.callbacksEnd = 0;
   this.nextTick = false;
 
+  var self = this;
   this.parser = new resp.ResponseParser(options);
   this.parser.on('error', function (error) { handleError(self, error); });
   this.parser.on('response', function (response) { handleResponse(self, response); });
@@ -74,6 +75,7 @@ function RedisClient(port, host, options) {
 }
 util.inherits(RedisClient, events.EventEmitter);
 
+
 RedisClient.prototype.call = function () {
   var self = this;
   var callback = null;
@@ -85,6 +87,7 @@ RedisClient.prototype.call = function () {
     // TODO add binary/buffer support
     this.request += resp.createRequestString.apply(null, arguments);
   }
+  // TODO emit error if callback depth exceeded and return
   this.callbacks[this.callbacksEnd] = callback;
   this.callbacksEnd = (this.callbacksEnd + 1) % this.callbacks.length;
   if (!this.nextTick) {
