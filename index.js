@@ -5,23 +5,17 @@ var net = require('net');
 var resp = require('node-resp');
 var util = require('util');
 
-function tryCallback(client, callback, error, response) {
-  try {
-    callback(error, response);
-  } catch (error) {
-    client.emit('callback-error', error);
-  }
-}
-
 function handleResponse(client, response) {
   var callback = client.callbacks[client.callbacksBegin];
   client.callbacksBegin = (client.callbacksBegin + 1) % client.callbacks.length;
   if (typeof callback === 'function') {
     if (response instanceof Error) {
-      tryCallback(client, callback, response);
+      callback(response);
     } else {
-      tryCallback(client, callback, null, response);
+      callback(null, response);
     }
+  } else if (response instanceof Error) {
+    client.emit('call-error', response);
   }
 }
 

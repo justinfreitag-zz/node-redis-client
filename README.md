@@ -1,14 +1,14 @@
 # node-redis-client
 
-**node-redis-client** is a *lightweight* [Redis](http://redis.io) client for
-[Node.js](http://nodejs.org). I could be more descriptive, but that would just
-add weight and slow it down.
+**node-redis-client** is a fast and lightweight [Redis](http://redis.io) client
+for [Node.js](http://nodejs.org).
 
-If you're interested in *benchmarks*, there's a slightly modified version of
-the [node-redis multi-bench utility](https://github.com/mranney/node_redis/blob/master/multi_bench.js)
-in [/bin](https://github.com/justinfreitag/node-redis-client/blob/master/bin)
-that may be used comparing against node-redis. A 5 client benchmark (taken on a
-Linux VM guest running on a MBP) can be found in [/bench](https://github.com/justinfreitag/node-redis-client/blob/master/bench).
+If you're interested in performance benchmarks, there's a comparison with
+[node-redis](https://github.com/mranney/node_redis) in
+[/bench](https://github.com/justinfreitag/node-redis-client/blob/master/bench).
+Included is the slightly modified
+[node-redis](https://github.com/mranney/node_redis) `multi-bench` utility. All
+benchmarks were taken on an Ubuntu Server VM running on a late 2011 MBP.
 
 ## Usage
 
@@ -31,7 +31,7 @@ Linux VM guest running on a MBP) can be found in [/bench](https://github.com/jus
         assert.equal(result, 'OK');
       });
 
-      // Multi block caring for callback only on EXEC
+      // Multi block with callback only on EXEC
       client.call('MULTI');
       client.call('SET', 'foo', 'bar');
       client.call('GET', 'foo');
@@ -49,9 +49,6 @@ Linux VM guest running on a MBP) can be found in [/bench](https://github.com/jus
 
     // Fatal client error
     client.on('error', function (error) { ... });
-
-    // Non-fatal client error
-    client.on('callback-error', function (error) { ... });
 
 ## License
 

@@ -1,4 +1,5 @@
 var assert = require('assert');
+var domain = require('domain');
 var RedisClient = require('..');
 
 var client = null;
@@ -16,13 +17,16 @@ it('should fail to authenticate', function (done) {
   });
 });
 
-it('should emit callback-error', function (done) {
-  client.call('PING', function (error, result) {
-    throw(new Error('POOOONG!'));
-  });
-  client.once('callback-error', function (error) {
-    assert(error instanceof Error);
+it('should not catch callback error', function (done) {
+  var d = domain.create();
+  d.on('error', function (error) {
+    assert.equal(error.message, 'POOOONG!');
+    d.dispose();
     done();
+  });
+  d.enter();
+  client.call('PING', function (error, result) {
+    throw new Error('POOOONG!');
   });
 });
 
