@@ -43,7 +43,7 @@ function handleEnd(client) {
 }
 
 var DEFAULT_OPTIONS = {
-  maximumCallbackDepth: 0x100
+  maxCallbackDepth: 0x100
 };
 
 function RedisClient(port, host, options) {
@@ -53,7 +53,7 @@ function RedisClient(port, host, options) {
   }
   this.options = util._extend(DEFAULT_OPTIONS, options);
   this.request = '';
-  this.callbacks = new Array(this.options.maximumCallbackDepth);
+  this.callbacks = new Array(this.options.maxCallbackDepth);
   this.callbacksBegin = 0;
   this.callbacksEnd = 0;
   this.nextTick = false;
@@ -75,9 +75,9 @@ function RedisClient(port, host, options) {
 }
 util.inherits(RedisClient, events.EventEmitter);
 
+RedisClient.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 RedisClient.prototype.call = function () {
-  var self = this;
   var callback = null;
   if (typeof arguments[arguments.length-1] === 'function') {
     callback = arguments[arguments.length-1];
@@ -91,6 +91,7 @@ RedisClient.prototype.call = function () {
   this.callbacks[this.callbacksEnd] = callback;
   this.callbacksEnd = (this.callbacksEnd + 1) % this.callbacks.length;
   if (!this.nextTick) {
+    var self = this;
     this.nextTick = true;
     process.nextTick(function () {
       self.socket.write(self.request);
@@ -103,7 +104,7 @@ RedisClient.prototype.call = function () {
 RedisClient.prototype.quit = function () {
   var self = this;
   var quitTimer = setTimeout(function () {
-    handleError(self, Error('Timeout on quit'));
+    handleError(self, new Error('Timeout on quit'));
   }, 2000);
   this.call('QUIT', function (error, result) {
     clearTimeout(quitTimer);
