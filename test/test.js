@@ -68,6 +68,34 @@ it('should multi/exec with error', function (done) {
   });
 });
 
+it('should switch between single and multi mode', function (done) {
+  assert.equal(client.singleMode, true);
+  client.call('MULTI');
+  assert.equal(client.singleMode, false);
+  client.call('SET', 'foo', 'bar');
+  client.call('EXEC', function (error, result) {
+    assert.equal(client.singleMode, true);
+    assert.equal(result[0], 'OK');
+    done();
+  });
+});
+
+it.skip('should emit call-error in single mode', function (done) {
+  client.call('MULTI');
+  assert.equal(client.singleMode, false);
+  client.call('EXEC', function (error, result) {
+    done();
+  });
+});
+
+it.skip('should not emit call-error in multi mode', function (done) {
+  client.call('MULTI');
+  assert.equal(client.singleMode, false);
+  client.call('EXEC', function (error, result) {
+    done();
+  });
+});
+
 it('should fail to publish when in subscribe mode', function (done) {
   client.call('SUBSCRIBE', 'foo', function (error, result) {
     assert.equal(result[0], 'subscribe');
