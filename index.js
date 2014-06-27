@@ -6,12 +6,9 @@ var resp = require('node-resp');
 var util = require('util');
 
 function handleResponse(client, response) {
-  var callback = client.calls[client.callsBegin];
-  client.callsBegin = (client.callsBegin + 1) % client.calls.length;
-  if (callback === null) { // multi-mode
-    return;
-  }
-  if (callback !== undefined && typeof callback === 'function') {
+  var callback = client.callbacks[client.callbacksBegin];
+  client.callbacksBegin = (client.callbacksBegin + 1) % client.callbacks.length;
+  if (callback != null && typeof callback === 'function') {
     if (response instanceof Error) {
       callback(response);
     } else {
@@ -59,10 +56,9 @@ function RedisClient(port, host, options) {
   }
   this.options = util._extend(DEFAULT_OPTIONS, options);
   this.request = '';
-  this.calls = new Array(this.options.maxCallbackDepth);
-  this.callsBegin = 0;
-  this.callsEnd = 0;
-  this.singleMode = true;
+  this.callbacks = new Array(this.options.maxCallbackDepth);
+  this.callbacksBegin = 0;
+  this.callbacksEnd = 0;
   this.nextTick = false;
 
   var self = this;
@@ -85,7 +81,7 @@ util.inherits(RedisClient, events.EventEmitter);
 RedisClient.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 RedisClient.prototype.call = function () {
-  var callback = null;
+  var callback;
   if (typeof arguments[arguments.length-1] === 'function') {
     callback = arguments[arguments.length-1];
     --arguments.length;
@@ -94,20 +90,9 @@ RedisClient.prototype.call = function () {
     // TODO add binary/buffer support
     this.request += resp.createRequestString.apply(null, arguments);
   }
-  // TODO separate MULTI and EXEC from call function?
-  // TODO make multi-mode behaviour optional?
-  if (arguments[0] === 'MULTI') {
-    this.singleMode = false;
-  } else if (arguments[0] === 'EXEC') {
-    this.singleMode = true;
-  }
   // TODO emit error if callback depth exceeded and return
-  if (this.singleMode) {
-    this.calls[this.callsEnd] = callback;
-  } else if (callback === undefined) {
-    this.calls[this.callsEnd] = null;
-  }
-  this.callsEnd = (this.callsEnd + 1) % this.calls.length;
+  this.callbacks[this.callbacksEnd] = callback;
+  this.callbacksEnd = (this.callbacksEnd + 1) % this.callbacks.length;
   if (!this.nextTick) {
     var self = this;
     this.nextTick = true;
