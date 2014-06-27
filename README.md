@@ -3,9 +3,9 @@
 **node-redis-client** is a fast and lightweight [Redis](http://redis.io) client
 for [Node.js](http://nodejs.org).
 
-If you're interested in performance benchmarks, there's a comparison with
-[node-redis](https://github.com/mranney/node_redis) in
-[/bench](https://github.com/justinfreitag/node-redis-client/blob/master/bench).
+If you're interested in performance benchmarks, a comparison with
+[node-redis](https://github.com/mranney/node_redis) can be found
+[here](https://github.com/justinfreitag/node-redis-client/blob/master/bench).
 Included is the slightly modified
 [node-redis](https://github.com/mranney/node_redis) `multi-bench` utility. All
 benchmarks were taken on an Ubuntu Server VM running on a late 2011 MBP.
@@ -46,6 +46,9 @@ benchmarks were taken on an Ubuntu Server VM running on a late 2011 MBP.
 
     // Client closed
     client.on('close', function (error) { ... });
+
+    // Non-fatal error response when callback omitted
+    client.on('call-error', function (error) { ... });
 
     // Fatal client error
     client.on('error', function (error) { ... });

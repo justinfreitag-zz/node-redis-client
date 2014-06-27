@@ -1,6 +1,6 @@
 'use strict';
 
-var events = require('events');
+var events = require('eventemitter3');
 var net = require('net');
 var resp = require('node-resp');
 var util = require('util');
@@ -8,7 +8,7 @@ var util = require('util');
 function handleResponse(client, response) {
   var callback = client.callbacks[client.callbacksBegin];
   client.callbacksBegin = (client.callbacksBegin + 1) % client.callbacks.length;
-  if (callback != null && typeof callback === 'function') {
+  if (callback && typeof callback === 'function') {
     if (response instanceof Error) {
       callback(response);
     } else {
@@ -16,15 +16,23 @@ function handleResponse(client, response) {
     }
     return;
   }
+
   if (response instanceof Error) {
-    client.emit('call-error', response);
+    if (!client.emit('call-error', response)) {
+      handleError(client, response);
+    }
   }
 }
 
 function handleError(client, error) {
-  client.emit('error', error);
-  client.socket.destroy();
-  client.parser = null;
+  var listening = client.emit('error', error);
+  if (listening) {
+    client.socket.destroy();
+    client.parser = null;
+    return;
+  }
+
+  throw error;
 }
 
 function handleConnect(client) {
@@ -55,6 +63,7 @@ function RedisClient(port, host, options) {
     host = null;
   }
   this.options = util._extend(DEFAULT_OPTIONS, options);
+
   this.request = '';
   this.callbacks = new Array(this.options.maxCallbackDepth);
   this.callbacksBegin = 0;
@@ -82,17 +91,20 @@ RedisClient.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 RedisClient.prototype.call = function () {
   var callback;
-  if (typeof arguments[arguments.length-1] === 'function') {
-    callback = arguments[arguments.length-1];
+  if (typeof arguments[arguments.length - 1] === 'function') {
+    callback = arguments[arguments.length - 1];
     --arguments.length;
   }
+
   if (arguments.length) {
     // TODO add binary/buffer support
     this.request += resp.createRequestString.apply(null, arguments);
   }
+
   // TODO emit error if callback depth exceeded and return
   this.callbacks[this.callbacksEnd] = callback;
   this.callbacksEnd = (this.callbacksEnd + 1) % this.callbacks.length;
+
   if (!this.nextTick) {
     var self = this;
     this.nextTick = true;
@@ -105,10 +117,10 @@ RedisClient.prototype.call = function () {
 };
 
 RedisClient.prototype.quit = function () {
-  var self = this;
   var quitTimer = setTimeout(function () {
-    handleError(self, new Error('Timeout on quit'));
-  }, 2000);
+    handleError(this, new Error('Timeout'));
+  }.bind(this), 2000);
+
   this.call('QUIT', function (error, result) {
     clearTimeout(quitTimer);
     if (error) {

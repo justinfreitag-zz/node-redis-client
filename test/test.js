@@ -1,12 +1,15 @@
 var assert = require('assert');
 var domain = require('domain');
 var RedisClient = require('..');
+var sinon = require('sinon');
 
 // TODO add max callback depth test
 
-var client = null;
+var clock;
+var client;
 
-before(function (done) {
+beforeEach(function (done) {
+  clock = sinon.useFakeTimers();
   client = new RedisClient(6379, '127.0.0.1');
   client.on('connect', done);
 });
@@ -20,15 +23,16 @@ it('should fail to authenticate', function (done) {
 });
 
 it('should not catch callback error', function (done) {
+  var errorMessage = 'POOOONG!';
   var d = domain.create();
   d.on('error', function (error) {
-    assert.equal(error.message, 'POOOONG!');
+    assert.equal(error.message, errorMessage);
     d.dispose();
     done();
   });
   d.enter();
   client.call('PING', function (error, result) {
-    throw new Error('POOOONG!');
+    throw new Error(errorMessage);
   });
 });
 
@@ -90,5 +94,16 @@ it('should fail to publish when in subscribe mode', function (done) {
 it('should quit', function (done) {
   client.on('close', done);
   client.quit();
+});
+
+it('should timeout on quit', function (done) {
+  client.once('error', function (error) {
+    assert(error instanceof Error);
+    assert.equal(error.message, 'Timeout');
+    client.on('error', function (ignore) {});
+    done();
+  });
+  client.quit();
+  clock.tick(3000);
 });
 

@@ -1,12 +1,14 @@
 {
   "name": "node-redis-client",
   "version": "0.0.4",
-  "description": "A lightweight Redis client for Node.js",
+  "description": "A fast and lightweight Redis client for Node.js",
   "dependencies": {
+    "eventemitter3": "0.1.2",
     "node-resp": "0.0.1"
   },
   "devDependencies": {
-    "mocha": "1.20.0"
+    "mocha": "1.20.0",
+    "sinon": "1.10.2"
   },
   "scripts": {
     "test": "NODE_ENV=test ./node_modules/.bin/mocha -R spec"
