@@ -8,7 +8,7 @@ var util = require('util');
 function handleResponse(client, response) {
   var callback = client.callbacks[client.callbacksBegin];
   client.callbacksBegin = (client.callbacksBegin + 1) % client.callbacks.length;
-  if (callback && typeof callback === 'function') {
+  if (callback) {
     if (response instanceof Error) {
       callback(response);
     } else {
@@ -25,8 +25,7 @@ function handleResponse(client, response) {
 }
 
 function handleError(client, error) {
-  var listening = client.emit('error', error);
-  if (listening) {
+  if (client.emit('error', error)) {
     client.socket.destroy();
     client.parser = null;
     return;
@@ -117,14 +116,15 @@ RedisClient.prototype.call = function () {
 };
 
 RedisClient.prototype.quit = function () {
+  var self = this;
   var quitTimer = setTimeout(function () {
-    handleError(this, new Error('Timeout'));
-  }.bind(this), 2000);
+    handleError(self, new Error('Timeout'));
+  }, 2000);
 
-  this.call('QUIT', function (error, result) {
+  this.call('QUIT', function (error) {
     clearTimeout(quitTimer);
     if (error) {
-      return handleError(error);
+      handleError(error);
     }
   });
 };
