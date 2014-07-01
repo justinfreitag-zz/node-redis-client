@@ -1,33 +1,36 @@
 'use strict';
 
-var events = require('eventemitter3');
+var events = require('event-emitter');
 var net = require('net');
 var resp = require('node-resp');
 var util = require('util');
 
-function handleResponse(client, response) {
-  var callback = client.callbacks[client.callbacksBegin];
-  client.callbacksBegin = (client.callbacksBegin + 1) % client.callbacks.length;
+var count = 0;
+
+function handleResponse(response) {
+  var callback = this.callbacks[this.callbacksBegin];
+  this.callbacksBegin = (this.callbacksBegin + 1) % this.callbacks.length;
   if (callback) {
+    var error;
     if (response instanceof Error) {
-      callback(response);
-    } else {
-      callback(null, response);
+      error = response;
+      response = undefined;
     }
+    callback(error, response);
     return;
   }
 
   if (response instanceof Error) {
-    if (!client.emit('call-error', response)) {
-      handleError(client, response);
+    if (!this.emit('call-error', response)) {
+      handleError.call(this, response);
     }
   }
 }
 
-function handleError(client, error) {
-  if (client.emit('error', error)) {
-    client.socket.destroy();
-    client.parser = null;
+function handleError(error) {
+  if (this.emit('error', error)) {
+    this.socket.destroy();
+    this.parser = null;
     return;
   }
 
@@ -55,6 +58,7 @@ var DEFAULT_OPTIONS = {
 
 function RedisClient(port, host, options) {
   if (port instanceof Object) {
+    options = host;
     port = port.port;
     host = port.host;
   } else if (host instanceof Object) {
@@ -67,20 +71,20 @@ function RedisClient(port, host, options) {
   this.callbacks = new Array(this.options.maxCallbackDepth);
   this.callbacksBegin = 0;
   this.callbacksEnd = 0;
-  this.nextTick = false;
+  this.nextTick = null;
+
+  this.parser = new resp.ResponseParser(options);
+  this.parser.on('error', handleError, this);
+  this.parser.on('response', handleResponse, this);
 
   var self = this;
-  this.parser = new resp.ResponseParser(options);
-  this.parser.on('error', function (error) { handleError(self, error); });
-  this.parser.on('response', function (response) { handleResponse(self, response); });
-
   this.socket = net.createConnection(port, host);
   this.socket.on('connect', function () { handleConnect(self); });
   this.socket.on('close', function (error) { handleClose(self, error); });
   this.socket.on('end', function () { handleEnd(self); });
   this.socket.on('data', function (data) { self.parser.parse(data); });
-  this.socket.on('error', function (error) { handleError(self, error); });
-  this.socket.on('timeout', function (error) { handleError(self, error); });
+  this.socket.on('error', function (error) { handleError.call(self, error); });
+  this.socket.on('timeout', function (error) { handleError.call(self, error); });
 
   events.EventEmitter.call(this);
 }
@@ -110,7 +114,7 @@ RedisClient.prototype.call = function () {
     process.nextTick(function () {
       self.socket.write(self.request);
       self.request = '';
-      self.nextTick = false;
+      self.nextTick = null;
     });
   }
 };
@@ -118,13 +122,13 @@ RedisClient.prototype.call = function () {
 RedisClient.prototype.quit = function () {
   var self = this;
   var quitTimer = setTimeout(function () {
-    handleError(self, new Error('Timeout'));
+    handleError.call(self, new Error('Timeout'));
   }, 2000);
 
   this.call('QUIT', function (error) {
     clearTimeout(quitTimer);
     if (error) {
-      handleError(error);
+      handleError.call(self, error);
     }
   });
 };

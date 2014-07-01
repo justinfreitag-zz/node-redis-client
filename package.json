@@ -3,7 +3,7 @@
   "version": "0.0.4",
   "description": "A fast and lightweight Redis client for Node.js",
   "dependencies": {
-    "eventemitter3": "0.1.2",
+    "event-emitter": "0.0.1",
     "node-resp": "0.0.1"
   },
   "devDependencies": {
