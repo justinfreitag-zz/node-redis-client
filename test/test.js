@@ -14,6 +14,11 @@ beforeEach(function (done) {
   client.on('connect', done);
 });
 
+it('should select db 1', function (done) {
+  var client = new RedisClient({db: 1});
+  client.on('connect', done);
+});
+
 it('should fail on unknown command', function (done) {
  client.call('FOO', 'bar', function (error, result) {
     assert(error instanceof Error);

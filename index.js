@@ -61,7 +61,8 @@ var DEFAULT_OPTIONS = {
 };
 
 function RedisClient(options) {
-  this.options = util._extend(DEFAULT_OPTIONS, options);
+  util._extend(this, DEFAULT_OPTIONS);
+  this.options = util._extend(this, options);
 
   this.request = '';
   this.callbacks = new Array(this.options.maxCallbackDepth);
