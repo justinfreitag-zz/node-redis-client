@@ -8,7 +8,7 @@ var util = require('util');
 function handleResponse(response) {
   var callback = this.callbacks[this.callbacksBegin];
   this.callbacksBegin = (this.callbacksBegin + 1) % this.callbacks.length;
-  if (callback) {
+  if (callback !== undefined) {
     var error;
     if (response instanceof Error) {
       error = response;
@@ -67,7 +67,7 @@ function RedisClient(options) {
   this.callbacks = new Array(this.options.maxCallbackDepth);
   this.callbacksBegin = 0;
   this.callbacksEnd = 0;
-  this.nextTick = null;
+  this.nextTick = undefined;
 
   this.parser = new resp.ResponseParser(options);
   this.parser.on('error', handleError, this);
@@ -104,13 +104,13 @@ RedisClient.prototype.call = function () {
   this.callbacks[this.callbacksEnd] = callback;
   this.callbacksEnd = (this.callbacksEnd + 1) % this.callbacks.length;
 
-  if (!this.nextTick) {
+  if (this.nextTick === undefined) {
     var self = this;
-    this.nextTick = true;
+    this.nextTick = null;
     process.nextTick(function () {
       self.socket.write(self.request);
       self.request = '';
-      self.nextTick = null;
+      self.nextTick = undefined;
     });
   }
 };
