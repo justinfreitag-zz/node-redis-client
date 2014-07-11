@@ -74,7 +74,9 @@ function RedisClient(options) {
   this.parser.on('response', handleResponse, this);
 
   var self = this;
-  this.socket = net.createConnection(this.options.port, this.options.host);
+  this.socket = net.createConnection(
+    this.options.path || this.options.port, this.options.host
+  );
   this.socket.on('connect', function () { handleConnect(self); });
   this.socket.on('close', function (error) { handleClose(self, error); });
   this.socket.on('end', function () { handleEnd(self); });
