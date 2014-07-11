@@ -1,6 +1,7 @@
 'use strict';
 
 var events = require('event-emitter');
+var merge = require('merge');
 var net = require('net');
 var resp = require('node-resp');
 var util = require('util');
@@ -61,8 +62,7 @@ var DEFAULT_OPTIONS = {
 };
 
 function RedisClient(options) {
-  util._extend(this, DEFAULT_OPTIONS);
-  this.options = util._extend(this, options);
+  this.options = merge(DEFAULT_OPTIONS, options);
 
   this.request = '';
   this.callbacks = new Array(this.options.maxCallbackDepth);

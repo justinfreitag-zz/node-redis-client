@@ -4,6 +4,7 @@
   "description": "A fast and lightweight Redis client for Node.js",
   "dependencies": {
     "event-emitter": "0.0.1",
+    "merge": "1.1.3",
     "node-resp": "0.0.1"
   },
   "devDependencies": {
@@ -30,4 +31,3 @@
   },
   "license": "MIT"
 }
-
