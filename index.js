@@ -36,6 +36,9 @@ function handleError(error) {
 }
 
 function handleConnect(client) {
+  if (client.options.db) {
+    client.call('SELECT', client.options.db);
+  }
   client.emit('connect');
 }
 
@@ -51,18 +54,13 @@ function handleEnd(client) {
 }
 
 var DEFAULT_OPTIONS = {
+  db: 0,
+  host: '127.0.0.1',
+  port: 6379,
   maxCallbackDepth: 256
 };
 
-function RedisClient(port, host, options) {
-  if (port instanceof Object) {
-    options = host;
-    port = port.port;
-    host = port.host;
-  } else if (host instanceof Object) {
-    options = host;
-    host = null;
-  }
+function RedisClient(options) {
   this.options = util._extend(DEFAULT_OPTIONS, options);
 
   this.request = '';
@@ -76,7 +74,7 @@ function RedisClient(port, host, options) {
   this.parser.on('response', handleResponse, this);
 
   var self = this;
-  this.socket = net.createConnection(port, host);
+  this.socket = net.createConnection(this.options.port, this.options.host);
   this.socket.on('connect', function () { handleConnect(self); });
   this.socket.on('close', function (error) { handleClose(self, error); });
   this.socket.on('end', function () { handleEnd(self); });

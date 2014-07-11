@@ -10,7 +10,7 @@ var client;
 
 beforeEach(function (done) {
   clock = sinon.useFakeTimers();
-  client = new RedisClient(6379, '127.0.0.1');
+  client = new RedisClient();
   client.on('connect', done);
 });
 

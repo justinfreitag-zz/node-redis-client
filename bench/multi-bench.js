@@ -53,7 +53,7 @@ Test.prototype.run = function (callback) {
 Test.prototype.new_client = function (id) {
     var self = this, new_client;
 
-    new_client = new RedisClient(6379, '127.0.0.1');
+    new_client = new RedisClient();
     new_client.name = 'RedisClient';
     new_client.create_time = Date.now();
 
