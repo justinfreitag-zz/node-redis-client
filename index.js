@@ -5,8 +5,6 @@ var net = require('net');
 var resp = require('node-resp');
 var util = require('util');
 
-var count = 0;
-
 function handleResponse(response) {
   var callback = this.callbacks[this.callbacksBegin];
   this.callbacksBegin = (this.callbacksBegin + 1) % this.callbacks.length;
@@ -94,7 +92,7 @@ RedisClient.DEFAULT_OPTIONS = DEFAULT_OPTIONS;
 
 RedisClient.prototype.call = function () {
   var callback;
-  if (typeof arguments[arguments.length - 1] === 'function') {
+  if (arguments[arguments.length - 1] instanceof Function) {
     callback = arguments[arguments.length - 1];
     --arguments.length;
   }
