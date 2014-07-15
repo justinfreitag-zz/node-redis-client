@@ -1,3 +1,9 @@
-.git*
+.npmignore
+.gitignore
+README.md
 .travis.yml
+bench/
+target/
+node_modules/
+*.log
 

@@ -1,12 +1,13 @@
 'use strict';
 
-var events = require('event-emitter');
 var merge = require('merge');
 var net = require('net');
+var events = require('node-events');
 var resp = require('node-resp');
 var util = require('util');
 
 function handleResponse(response) {
+  /* jshint validthis: true */
   var callback = this.callbacks[this.callbacksBegin];
   this.callbacksBegin = (this.callbacksBegin + 1) % this.callbacks.length;
   if (callback !== undefined) {
@@ -27,6 +28,7 @@ function handleResponse(response) {
 }
 
 function handleError(error) {
+  /* jshint validthis: true */
   if (this.emit('error', error)) {
     this.socket.destroy();
     this.parser = null;
@@ -54,6 +56,20 @@ function handleEnd(client) {
   client.parser = null;
 }
 
+function connect(client) {
+  var socket = net.createConnection(
+    client.options.path || client.options.port, client.options.host
+  );
+  socket.on('connect', function () { handleConnect(client); });
+  socket.on('close', function (error) { handleClose(client, error); });
+  socket.on('end', function () { handleEnd(client); });
+  socket.on('data', function (data) { client.parser.parse(data); });
+  socket.on('error', function (error) { handleError.call(client, error); });
+  socket.on('timeout', function (error) { handleError.call(client, error); });
+
+  return socket;
+}
+
 var DEFAULT_OPTIONS = {
   db: 0,
   host: '127.0.0.1',
@@ -74,16 +90,7 @@ function RedisClient(options) {
   this.parser.on('error', handleError, this);
   this.parser.on('response', handleResponse, this);
 
-  var self = this;
-  this.socket = net.createConnection(
-    this.options.path || this.options.port, this.options.host
-  );
-  this.socket.on('connect', function () { handleConnect(self); });
-  this.socket.on('close', function (error) { handleClose(self, error); });
-  this.socket.on('end', function () { handleEnd(self); });
-  this.socket.on('data', function (data) { self.parser.parse(data); });
-  this.socket.on('error', function (error) { handleError.call(self, error); });
-  this.socket.on('timeout', function (error) { handleError.call(self, error); });
+  this.socket = connect(this);
 
   events.EventEmitter.call(this);
 }
@@ -98,8 +105,7 @@ RedisClient.prototype.call = function () {
     --arguments.length;
   }
 
-  if (arguments.length) {
-    // TODO add binary/buffer support
+  if (arguments.length > 0) {
     this.request += resp.createRequestString.apply(null, arguments);
   }
 
