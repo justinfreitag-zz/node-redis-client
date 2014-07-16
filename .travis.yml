@@ -6,5 +6,5 @@ before_install:
   - npm install -g gulp
 
 script:
-  - gulp lint coverage
+  - gulp lint test # coverage complexity
 
