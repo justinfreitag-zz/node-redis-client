@@ -6,6 +6,9 @@ node_js:
 before_install:
   - npm install -g gulp
 
+services:
+    - redis-server
+
 script:
   - gulp lint test # coverage complexity
 
