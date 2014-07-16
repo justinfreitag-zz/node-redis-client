@@ -1,7 +1,7 @@
 'use strict';
 
 var assert = require('assert');
-var domain = require('domain');
+var Domain = require('domain');
 var RedisClient = require('..');
 var sinon = require('sinon');
 
@@ -37,29 +37,37 @@ it('should fail to authenticate', function (done) {
   });
 });
 
-it.skip('should not catch callback error', function (done) {
+it('should not catch callback error', function (done) {
   var errorMessage = 'FOO';
-  var d = domain.create();
-  d.on('error', function (error) {
+  var domain = Domain.create();
+  domain.on('error', function (error) {
     assert.equal(error.message, errorMessage);
-    d.exit();
+    domain.dispose();
     done();
   });
-  d.enter();
-  client.call('PING', function () {
-    throw new Error(errorMessage);
+  domain.run(function () {
+    var client = new RedisClient();
+    client.once('connect', function () {
+      client.call('PING', function () {
+        throw new Error(errorMessage);
+      });
+    });
   });
 });
 
-it.skip('should emit error in place of call-error', function (done) {
-  var d = domain.create();
-  d.on('error', function (error) {
+it('should throw call-error', function (done) {
+  var domain = Domain.create();
+  domain.on('error', function (error) {
     assert(error instanceof Error);
-    d.exit();
+    domain.dispose();
     done();
   });
-  d.enter();
-  client.call('FOO');
+  domain.run(function () {
+    var client = new RedisClient();
+    client.once('connect', function () {
+      client.call('FOO');
+    });
+  });
 });
 
 it('should set and get value', function (done) {
