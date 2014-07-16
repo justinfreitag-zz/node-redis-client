@@ -7,18 +7,21 @@ var sinon = require('sinon');
 
 // TODO add max callback depth test
 
-var clock;
 var client;
+var clock;
 
 beforeEach(function (done) {
-  clock = sinon.useFakeTimers();
   client = new RedisClient();
+  clock = sinon.useFakeTimers();
   client.once('connect', done);
 });
 
 it('should select db 1', function (done) {
   var client = new RedisClient({db: 1});
-  client.on('connect', done);
+  client.on('connect', function () {
+    assert.equal(client.options.db, 1);
+    done();
+  });
 });
 
 it('should fail on unknown command', function (done) {
@@ -42,7 +45,6 @@ it('should not catch callback error', function (done) {
   var domain = Domain.create();
   domain.on('error', function (error) {
     assert.equal(error.message, errorMessage);
-    domain.dispose();
     done();
   });
   domain.run(function () {
@@ -59,7 +61,6 @@ it('should throw call-error', function (done) {
   var domain = Domain.create();
   domain.on('error', function (error) {
     assert(error instanceof Error);
-    domain.dispose();
     done();
   });
   domain.run(function () {

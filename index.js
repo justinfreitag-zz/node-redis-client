@@ -125,6 +125,10 @@ RedisClient.prototype.call = function () {
 };
 
 RedisClient.prototype.quit = function () {
+  if (this.socket.destroyed) {
+    return;
+  }
+
   var self = this;
   var quitTimer = setTimeout(function () {
     handleError.call(self, new Error('Timeout'));
@@ -134,6 +138,8 @@ RedisClient.prototype.quit = function () {
     clearTimeout(quitTimer);
     if (error) {
       handleError.call(self, error);
+    } else {
+      self.emit('quit');
     }
   });
 };
