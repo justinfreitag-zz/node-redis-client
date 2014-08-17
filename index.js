@@ -3,7 +3,7 @@
 var merge = require('merge');
 var net = require('net');
 var events = require('node-events');
-var resp = require('node-resp');
+var redisProtocol = require('node-redis-protocol');
 var util = require('util');
 
 function handleResponse(response) {
@@ -86,7 +86,7 @@ function RedisClient(options) {
   this.callbacksEnd = 0;
   this.nextTick = undefined;
 
-  this.parser = new resp.ResponseParser(options);
+  this.parser = new redisProtocol.ResponseParser(options);
   this.parser.on('error', handleError, this);
   this.parser.on('response', handleResponse, this);
 
@@ -106,11 +106,12 @@ RedisClient.prototype.call = function () {
   }
 
   if (arguments.length > 0) {
-    this.request += resp.createRequestString.apply(null, arguments);
+    this.request += redisProtocol.createRequestString.apply(null, arguments);
   }
 
   // TODO emit error if callback depth exceeded and return
   this.callbacks[this.callbacksEnd] = callback;
+  // TODO move this into separate package
   this.callbacksEnd = (this.callbacksEnd + 1) % this.callbacks.length;
 
   if (this.nextTick === undefined) {
