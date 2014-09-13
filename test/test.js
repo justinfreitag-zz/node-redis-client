@@ -81,6 +81,17 @@ it('should set and get value', function (done) {
   });
 });
 
+it('should chain calls', function (done) {
+  client
+    .call('SET', 'foo', 'bar', function (error, result) {
+      assert.equal(result, 'OK');
+    })
+    .call('GET', 'foo', function (error, result) {
+      assert.equal(result, 'bar');
+      done();
+    });
+});
+
 it('should multi/exec', function (done) {
   client.call('MULTI');
   client.call('SETEX', 'foo', 5000000, 'bar');

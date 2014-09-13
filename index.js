@@ -123,6 +123,8 @@ RedisClient.prototype.call = function () {
       self.nextTick = undefined;
     });
   }
+
+  return this;
 };
 
 RedisClient.prototype.quit = function () {
