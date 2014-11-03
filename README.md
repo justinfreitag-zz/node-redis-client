@@ -25,7 +25,7 @@ were taken on an Ubuntu Server VM running on a late 2011 MBP.
       });
 
       // Multiple parameters with callback
-      clienti.call('SET', 'foo', 'bar', function (error, result) {
+      client.call('SET', 'foo', 'bar', function (error, result) {
         assert.equal(result, 'OK');
       });
 
